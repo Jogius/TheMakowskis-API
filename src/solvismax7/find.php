@@ -35,7 +35,7 @@ try
 {
   if ($range)
 	{
-    $query = "SELECT * FROM data WHERE timestamp BETWEEN FROM_UNIXTIME(:from) AND FROM_UNIXTIME(:to) ORDER BY timestamp DESC;";
+    $query = "SELECT * FROM data WHERE timestamp BETWEEN FROM_UNIXTIME(:from) AND FROM_UNIXTIME(:to) ORDER BY timestamp ASC;";
 
     $statement = $dbConnection->prepare($query);
     $statement->bindParam(":from", $from);
