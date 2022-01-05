@@ -1,0 +1,8 @@
+{
+  "name": "jogius/themakowskis-api",
+  "description": "A PHP API that exposes endpoints to create and read data from a database.",
+  "license": "MIT",
+  "require": {
+      "vlucas/phpdotenv": "^5.4"
+  }
+}
