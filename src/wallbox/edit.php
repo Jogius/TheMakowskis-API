@@ -12,19 +12,16 @@ header("Content-Type: application/json; charset=UTF-8");
 (Dotenv\Dotenv::createImmutable(__DIR__))->load();
 
 // Initialize database connection
-$initStatement = "
-CREATE TABLE IF NOT EXISTS data (
-  id INT NOT NULL AUTO_INCREMENT,
-  start TIMESTAMP NOT NULL,
-  end TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  energy INT NOT NULL,
-  note TEXT NULL DEFAULT NULL,
-  PRIMARY KEY (id)
-) ENGINE=INNODB;
-";
-$dbConnection = (new DatabaseConnector($initStatement))->getConnection();
+$dbConnection = (new DatabaseConnector())->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
+
+// Check if `token` in query parameters
+$params = array();
+parse_str($_SERVER["QUERY_STRING"], $params);
+if (isset($params["token"]) && !isset($data->token)) {
+  $data->token = $params["token"];
+}
 
 if (
   !isset($data->token) ||
@@ -35,18 +32,19 @@ if (
   return;
 }
 
-// Set data to null if unset
-if (!isset($data->start)) $data->start = null;
-if (!isset($data->end)) $data->end = null;
-if (!isset($data->energy)) $data->energy = null;
+// Return error code 400 if data unset
+if (!isset($data->id) || !isset($data->note)) {
+  http_response_code(400);
+  echo json_encode(array("message" => "ID or note missing."));
+  return;
+}
 
 try {
-  $query = "INSERT INTO data(start, end, energy) VALUES(:start, :end, :energy);";
+  $query = "UPDATE data SET note=:note WHERE id =:id;";
 
   $statement = $dbConnection->prepare($query);
-  $statement->bindParam(":start", $data->start);
-  $statement->bindParam(":end", $data->end);
-  $statement->bindParam(":energy", $data->energy);
+  $statement->bindParam(":note", $data->note);
+  $statement->bindParam(":id", $data->id);
 
   $success = $statement->execute();
 
