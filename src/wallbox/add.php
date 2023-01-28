@@ -39,14 +39,16 @@ if (
 if (!isset($data->start)) $data->start = null;
 if (!isset($data->end)) $data->end = null;
 if (!isset($data->energy)) $data->energy = null;
+if (!isset($data->note)) $data->note = null;
 
 try {
-  $query = "INSERT INTO data(start, end, energy) VALUES(:start, :end, :energy);";
+  $query = "INSERT INTO data(`start`, `end`, energy, note) VALUES(:start, :end, :energy, :note);";
 
   $statement = $dbConnection->prepare($query);
-  $statement->bindParam(":start", $data->start);
-  $statement->bindParam(":end", $data->end);
+  $statement->bindParam(":start", date("Y-m-d H:i:s", $data->start / 1000));
+  $statement->bindParam(":end", date("Y-m-d H:i:s", $data->end / 1000));
   $statement->bindParam(":energy", $data->energy);
+  $statement->bindParam(":note", $data->note);
 
   $success = $statement->execute();
 
